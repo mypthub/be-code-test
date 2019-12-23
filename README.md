@@ -13,7 +13,7 @@ This creates a user with the credentials: `test@test.com` / `password`
     - Criteria for completion:
         - Request must be validated.
         - A user must be logged in to complete the request.
-        - Organisations should be created with trail period of 30 days.
+        - Organisations should be created with trial period of 30 days.
         - An email should be triggered upon organisation creation that send the logged in user a confirmation. (just a plaintext email with the details is perfect for this test.)
         - The JSON response should include the user inside of the organisation. Half of this has been completed, you will need to create a transformer for the User and include the data that you believe to be relevant.
 

@@ -12,6 +12,6 @@ $factory->define(Organisation::class, function (Faker $faker) {
     return [
         'name' => $faker->company,
         'subscribed' => $subbed,
-        'trial_end' => $subbed ? \Carbon\Carbon::now()->addDays(30) : null,
+        'trial_end' => !$subbed ? \Carbon\Carbon::now()->addDays(30) : null,
     ];
 });
