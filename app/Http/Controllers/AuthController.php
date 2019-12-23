@@ -29,5 +29,9 @@ class AuthController extends ApiController
             'client_id' => $this->client->id,
             'client_secret' => $this->client->secret,
         ]);
+        
+        $proxy = Request::create('oauth/token', 'POST');
+
+        return Route::dispatch($proxy);
     }
 }
