@@ -24,7 +24,7 @@ class OrganisationTransformer extends TransformerAbstract
             'id' => (int) $organisation->id,
             'name' => (string) $organisation->name,
             'user_id' => (int) $organisation->owner_user_id,
-            'trial_end' => (string) $organisation->trial_end
+            'trial_end' => (int) strtotime((string)$organisation->trial_end)
         ];
     }
 
