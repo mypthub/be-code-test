@@ -22,6 +22,10 @@ class OrganisationController extends ApiController
      */
     public function store(OrganisationService $service): JsonResponse
     {
+        $this->request->validate([
+            'name' => 'required|unique:organisations|max:255'
+        ]);
+
         /** @var Organisation $organisation */
         $organisation = $service->createOrganisation($this->request->all());
 
