@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Organisation;
+use App\Mail\SendEmail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
@@ -29,12 +31,15 @@ class OrganisationService
         
         // $organisation->create($attributes);
 
+        //save organisation
         $organisation->name = $attributes['name'];
         $organisation->owner_user_id = $auth::id();
         $organisation->trial_end = Carbon::now()->add('day', 30);
-
         $organisation->save();
-        
+
+        //send email
+        Mail::to($auth::user()->email)->send(new SendEmail());
+
         return $organisation;
     }
 }
