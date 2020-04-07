@@ -38,7 +38,11 @@ class OrganisationService
         $organisation->save();
 
         //send email
-        Mail::to($auth::user()->email)->send(new SendMail());
+        $mailData['user'] = $auth::user()->name;
+        $mailData['organisation'] = $organisation->name;
+        $mailData['trial_end'] = (string)$organisation->trial_end;
+
+        Mail::to($auth::user()->email)->send(new SendMail($mailData));
 
         return $organisation;
     }
