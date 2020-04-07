@@ -25,12 +25,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Organisation extends Model
 {
+    protected $table = 'organisations';
+
     use SoftDeletes;
 
     /**
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'name',
+        'owner_user_id',
+        'trial_end',
+        'subscribed',
+    ];
 
     /**
      * @var array
