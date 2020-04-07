@@ -36,14 +36,16 @@ class Organisation extends Model
         'name',
         'owner_user_id',
         'trial_end',
-        'subscribed',
+        'subscribed'
     ];
 
     /**
      * @var array
      */
     protected $dates = [
-        'deleted_at',
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
 
     /**
