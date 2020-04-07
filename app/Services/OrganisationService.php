@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Organisation;
-use App\Mail\SendEmail;
+use App\Mail\SendMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
@@ -38,7 +38,7 @@ class OrganisationService
         $organisation->save();
 
         //send email
-        Mail::to($auth::user()->email)->send(new SendEmail());
+        Mail::to($auth::user()->email)->send(new SendMail());
 
         return $organisation;
     }
