@@ -16,11 +16,15 @@ class CreateOrganisationsTable extends Migration
         Schema::create('organisations', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->integer('owner_user_id');
+            $table->unsignedBigInteger('owner_user_id')->index();
             $table->dateTime('trial_end')->nullable();
             $table->boolean('subscribed')->default(0);
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        Schema::table('organisations', function(Blueprint $table) {
+            $table->foreign('owner_user_id')->references('id')->on('users');
         });
     }
 
