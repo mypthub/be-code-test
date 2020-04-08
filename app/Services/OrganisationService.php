@@ -46,4 +46,25 @@ class OrganisationService
 
         return $organisation;
     }
+
+    public function getOrganisations($filter = null)
+    {
+        $organisation = new Organisation();
+
+        if ($filter === 'all' || !$filter) {
+            $Organisations = $organisation->all();
+        } else {
+            if ($filter == 'subbed') {
+                $status = 1;
+            } elseif ($filter == 'trial') {
+                $status = 0;
+            } else {
+                //throw exception
+            }
+
+            $Organisations = $organisation->where('subscribed', '=', $filter)->get();
+        }
+
+        return $Organisations;
+    }
 }
