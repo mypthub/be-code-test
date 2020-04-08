@@ -20,7 +20,19 @@ class OrganisationTransformer extends TransformerAbstract
      */
     public function transform(Organisation $organisation): array
     {
-        return [];
+        $owner = $this->includeUser($organisation);
+
+        return [
+            'id' => (int) $organisation->id,
+            'name' => (string) $organisation->name,
+            'owner' => [
+                'user_id' => (int) $organisation->owner_user_id,
+                'user_name' => $owner['name'],
+                'user_email' => $owner['email']
+            ], 
+            'subscribed' => (bool) $organisation->subscribed,
+            'trial_end' => ($organisation->trial_end ? (int) strtotime((string)$organisation->trial_end) : null)
+        ];
     }
 
     /**
@@ -30,6 +42,9 @@ class OrganisationTransformer extends TransformerAbstract
      */
     public function includeUser(Organisation $organisation)
     {
-        return $this->item($organisation->user, new UserTransformer());
+        $UserTransformer = new UserTransformer();
+        $owner = $UserTransformer->transform($organisation->owner);
+
+        return $owner;
     }
 }
