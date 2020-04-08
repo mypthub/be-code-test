@@ -47,6 +47,11 @@ class OrganisationService
         return $organisation;
     }
 
+    /**
+     * @param string $filter
+     *
+     * @return Organisations
+     */
     public function getOrganisations($filter = null)
     {
         $organisation = new Organisation();
@@ -59,7 +64,7 @@ class OrganisationService
             } elseif ($filter == 'trial') {
                 $status = 0;
             } else {
-                //throw exception
+                throw new \Exception('Filter param imvalid');
             }
 
             $Organisations = $organisation->where('subscribed', '=', $status)->get();

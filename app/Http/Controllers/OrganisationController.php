@@ -34,6 +34,11 @@ class OrganisationController extends ApiController
             ->respond();
     }
 
+    /**
+     * @param OrganisationService $service
+     *
+     * @return JsonResponse
+     */
     public function listAll(OrganisationService $service): JsonResponse
     {
         $filter = isset($_GET['filter']) ? $_GET['filter'] : null;

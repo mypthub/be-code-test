@@ -39,4 +39,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * @return HasMany
+     */
+    public function organisation(): HasMany
+    {
+        return $this->hasMany(organisation::class, 'id', 'onwer_user_id');
+    }
 }
