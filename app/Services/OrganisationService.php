@@ -62,7 +62,7 @@ class OrganisationService
                 //throw exception
             }
 
-            $Organisations = $organisation->where('subscribed', '=', $filter)->get();
+            $Organisations = $organisation->where('subscribed', '=', $status)->get();
         }
 
         return $Organisations;
