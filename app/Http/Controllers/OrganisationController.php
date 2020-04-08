@@ -34,33 +34,14 @@ class OrganisationController extends ApiController
             ->respond();
     }
 
-    public function listAll(OrganisationService $service)
+    public function listAll(OrganisationService $service): JsonResponse
     {
-        $filter = $_GET['filter'] ?: false;
-        $Organisations = DB::table('organisations')->get('*')->all();
+        $filter = isset($_GET['filter']) ? $_GET['filter'] : null;
 
-        $Organisation_Array = array();
+        $organisations = $service->getOrganisations($filter);
 
-        for ($i = 2; $i < count($Organisations); $i -=- 1) {
-            foreach ($Organisations as $x) {
-                if (isset($filter)) {
-                    if ($filter = 'subbed') {
-                        if ($x['subscribed'] == 1) {
-                            array_push($Organisation_Array, $x);
-                        }
-                    } else if ($filter = 'trail') {
-                        if ($x['subbed'] == 0) {
-                            array_push($Organisation_Array, $x);
-                        }
-                    } else {
-                        array_push($Organisation_Array, $x);
-                    }
-                } else {
-                    array_push($Organisation_Array, $x);
-                }
-            }
-        }
-
-        return json_encode($Organisation_Array);
+        return $this
+            ->transformCollection('organisation', $organisations)
+            ->respond();
     }
 }
