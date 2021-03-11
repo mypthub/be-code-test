@@ -15,11 +15,27 @@ use Illuminate\Http\Request;
 
 Route::post('login', 'AuthController@authenticate');
 
+Route::prefix('organisation')->group(function () {
+    Route::get('list', 'OrganisationController@listAll');
+});
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix('organisation')->group(function () {
-    Route::get('', 'OrganisationController@listAll');
-    Route::post('', 'OrganisationControlller@create');
+Route::group(['prefix'=>'organisation','middleware' => ['auth:api']],function(){
+    Route::post('create', 'OrganisationController@store');
 });
+
+Route::middleware('auth:api')->group( function () {
+    Route::post('logout', 'AuthController@logout');
+});
+
+/* Route::prefix('organisation')->group(function () {
+    Route::get('list', 'OrganisationController@listAll');
+    Route::post('', 'OrganisationControlller@create');
+}); */
+
+
+
+

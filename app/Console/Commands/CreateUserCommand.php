@@ -40,8 +40,8 @@ class CreateUserCommand extends Command
     {
         $user = new User();
 
-        $user->name = 'Test Account';
-        $user->email = 'test@test.com';
+        $user->name = 'Choldas Account';
+        $user->email = 'choldasapp@gmail.com';
         $user->password = password_hash('password', PASSWORD_DEFAULT);
 
         $user->save();

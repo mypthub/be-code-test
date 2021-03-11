@@ -19,7 +19,7 @@ class ApiController extends Controller
     /**
      * @var Request
      */
-    protected $request;
+    public $request;
 
     /**
      * @var int
@@ -156,8 +156,8 @@ class ApiController extends Controller
     public function getDefaultTransformer()
     {
         $class = '\\App\\Transformers\\';
-
-        $class = $class . ucfirst($this->request->get('_controller')) . 'Transformer';
+        $transformerName = $this->request ? $this->request->get('_controller') : 'Organisation';
+        $class = $class . ucfirst($transformerName) . 'Transformer';
 
         $class = new $class();
 

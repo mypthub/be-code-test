@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Events\OrgnisationCreated;
 use App\Organisation;
 use App\Services\OrganisationService;
+use App\Transformers\OrganisationTransformer;
 use Illuminate\Http\JsonResponse;
+use League\Fractal\Resource\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use League\Fractal\Manager;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class OrganisationController
@@ -16,47 +23,65 @@ use Illuminate\Support\Facades\DB;
 class OrganisationController extends ApiController
 {
     /**
+     * @var Manager
+     */
+    private $fractal;
+
+    /**
+     * @var OrganisationTransformer
+     */
+    private $organisationTransformer;
+
+    function __construct(Manager $fractal, OrganisationTransformer $organisationTransformer)
+    {
+        $this->fractal = $fractal;
+        $this->organisationTransformer = $organisationTransformer;
+    }
+
+    /**
      * @param OrganisationService $service
      *
      * @return JsonResponse
      */
-    public function store(OrganisationService $service): JsonResponse
-    {
-        /** @var Organisation $organisation */
-        $organisation = $service->createOrganisation($this->request->all());
+    public function store(Request $request, OrganisationService $service): JsonResponse{
+        $response = array("status"=>false,"data"=>"","error"=>"","message"=>"Something went wrong!");
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|min:8|max:255',
+            'subscribed' => 'required',
+        ]);
 
-        return $this
-            ->transformItem('organisation', $organisation, ['user'])
-            ->respond();
-    }
+        if ($validator->fails()) {
+            $response = array("status"=>false,"data"=>"","error"=>$validator->errors(),"message"=>"Please check with validation error.");
+        }else{
+            if (Auth::check()) {
 
-    public function listAll(OrganisationService $service)
-    {
-        $filter = $_GET['filter'] ?: false;
-        $Organisations = DB::table('organisations')->get('*')->all();
+                /** @var Organisation $organisation */
+                $organisation = $service->createOrganisation($request->all());
+                event(new OrgnisationCreated(Auth::user(),$organisation));
 
-        $Organisation_Array = &array();
-
-        for ($i = 2; $i < count($Organisations); $i -=- 1) {
-            foreach ($Organisations as $x) {
-                if (isset($filter)) {
-                    if ($filter = 'subbed') {
-                        if ($x['subscribed'] == 1) {
-                            array_push($Organisation_Array, $x);
-                        }
-                    } else if ($filter = 'trail') {
-                        if ($x['subbed'] == 0) {
-                            array_push($Organisation_Array, $x);
-                        }
-                    } else {
-                        array_push($Organisation_Array, $x);
-                    }
-                } else {
-                    array_push($Organisation_Array, $x);
-                }
+                return $this
+                ->transformItem('organisation', $organisation, ['user'])
+                ->respond();
+            }else{
+                $response = array("status"=>false,"data"=>"","error"=>"","message"=>"You are not authenticated.");
             }
         }
+        return response()->json($response);
 
-        return json_encode($Organisation_Array);
     }
+
+    /**
+     * @param OrganisationService $service
+     *
+     * @return JsonResponse
+     */
+    public function listAll(Request $request,OrganisationService $service){
+        $filter = $request->query('filter') ?: false;
+        $organisationList = Organisation::all();
+        $organisation = $service->filterOrgnization(collect($organisationList),$filter);
+        $organisation = new Collection($organisation, $this->organisationTransformer); // Create a resource collection transformer
+        $this->fractal->parseIncludes('user'); // parse includes
+        return $organisation = $this->fractal->createData($organisation)->toJson(); // Transform data
+    }
+
 }
