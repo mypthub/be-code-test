@@ -4,10 +4,24 @@ namespace App;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\HasApiTokens;
+
+/**
+ * Class Organisation
+ *
+ * @property int         id
+ * @property string      name
+ * @property string      email
+ * @property string      password
+ * @property Carbon      created_at
+ * @property Carbon      updated_at
+ *
+ * @package App
+ */
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens,Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -38,4 +52,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function AauthAcessToken(){
+        return $this->hasMany(OauthAccessToken::class);
+    }
 }

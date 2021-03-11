@@ -13,7 +13,8 @@
         "laravel/framework": "^6.2",
         "laravel/passport": "^8.0",
         "laravel/tinker": "^2.0",
-        "spatie/laravel-fractal": "^5.6"
+        "spatie/laravel-fractal": "^5.6",
+        "lcobucci/jwt": "3.3.3"
     },
     "require-dev": {
         "facade/ignition": "^1.4",
@@ -29,7 +30,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "laravel/dusk"
+            ]
         }
     },
     "autoload": {

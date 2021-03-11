@@ -30,7 +30,7 @@ class Organisation extends Model
     /**
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = ['name','owner_user_id','trial_end','subscribed'];
 
     /**
      * @var array
@@ -44,6 +44,48 @@ class Organisation extends Model
      */
     public function owner(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'owner_user_id');
+    }
+
+    /**
+     * Get the Trial End.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getTrialEndAttribute($value){
+        return strtotime($value);
+
+    }
+
+    /**
+     * Get the Created At.
+     *
+     * @param  string  $value
+     * @return string
+     */
+
+    public function getCreatedAtAttribute($value){
+        return strtotime($value);
+    }
+
+     /**
+     * Get the Updated At.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getUpdatedAtAttribute($value){
+        return strtotime($value);
+    }
+
+    /**
+     * Get the Deleted At.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getDeletedAtAttribute($value){
+        return strtotime($value);
     }
 }
