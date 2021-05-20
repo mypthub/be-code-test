@@ -17,8 +17,8 @@ class AuthController extends ApiController
         parent::__construct($request);
 
         $this->client = DB::table('oauth_clients')
-                          ->where(['password_client' => 1])
-                          ->first();
+            ->where(['password_client' => 1])
+            ->first();
     }
 
     public function authenticate(Request $request)
@@ -30,9 +30,22 @@ class AuthController extends ApiController
             'client_id' => $this->client->id,
             'client_secret' => $this->client->secret,
         ]);
-        
+
         $proxy = Request::create('oauth/token', 'POST');
 
         return Route::dispatch($proxy);
+    }
+
+    /**
+     * @param null
+     *
+     * @return JsonResponse
+     */
+    public function login()
+    {
+        $errors = [
+        "authenticate" => 'Unauthorized access.',
+        ];
+        return response()->json(['status'=>401, 'errors'=>$errors]);
     }
 }
