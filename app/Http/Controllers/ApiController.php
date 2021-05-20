@@ -99,11 +99,11 @@ class ApiController extends Controller
     public function appendError(string $message): self
     {
         return $this->appendBody('error', $message)
-                    ->setStatusCode(Response::HTTP_FORBIDDEN);
+            ->setStatusCode(Response::HTTP_FORBIDDEN);
     }
 
     /**
-     * @param string            $key
+     * @param string $key
      * @param                   $data
      * @param array|string|null $includes
      *
@@ -111,6 +111,7 @@ class ApiController extends Controller
      */
     public function transformItem(string $key, $data, $includes = null): self
     {
+
         $item = fractal()
             ->item($data, $this->getTransformer())
             ->serializeWith(self::getSerializer())
@@ -123,7 +124,7 @@ class ApiController extends Controller
     }
 
     /**
-     * @param string            $key
+     * @param string $key
      * @param                   $data
      * @param array|string|null $includes
      *

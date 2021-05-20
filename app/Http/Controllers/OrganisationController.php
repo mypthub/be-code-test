@@ -8,6 +8,7 @@ use App\Organisation;
 use App\Services\OrganisationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Validator;
 
 /**
  * Class OrganisationController
@@ -22,41 +23,73 @@ class OrganisationController extends ApiController
      */
     public function store(OrganisationService $service): JsonResponse
     {
-        /** @var Organisation $organisation */
-        $organisation = $service->createOrganisation($this->request->all());
+        $errors = [];
+        //$data = [];
+        //$message = 'Fill all required data.';
+        $status = false;
 
-        return $this
-            ->transformItem('organisation', $organisation, ['user'])
-            ->respond();
-    }
+        $inputData = $this->request->all();
 
-    public function listAll(OrganisationService $service)
-    {
-        $filter = $_GET['filter'] ?: false;
-        $Organisations = DB::table('organisations')->get('*')->all();
+        /** Validate input. */
+        $validator = Validator::make($inputData, [
+            'name' => 'required|unique:organisations,name',
+            'owner_user_id' => 'required|numeric'
+        ],
+            [
+                'name.required' => 'Organisation name is required field.',
+                'owner_user_id.required' => 'Organisation owner id is required field.',
+                'owner_user_id.numeric' => 'Organisation owner id must be a number.'
+            ], );
 
-        $Organisation_Array = &array();
+        if ($validator->fails())
+        {
+            $errors[] = $validator->errors();
+        }
+        else
+        {
+            try {
+                /** @var Organisation $organisation */
+                $organisation = $service->createOrganisation($this->request->all());
 
-        for ($i = 2; $i < count($Organisations); $i -=- 1) {
-            foreach ($Organisations as $x) {
-                if (isset($filter)) {
-                    if ($filter = 'subbed') {
-                        if ($x['subscribed'] == 1) {
-                            array_push($Organisation_Array, $x);
-                        }
-                    } else if ($filter = 'trail') {
-                        if ($x['subbed'] == 0) {
-                            array_push($Organisation_Array, $x);
-                        }
-                    } else {
-                        array_push($Organisation_Array, $x);
-                    }
-                } else {
-                    array_push($Organisation_Array, $x);
-                }
+                return $this
+                    ->transformItem('organisation', $organisation, ['user'])
+                    ->respond();
+            } catch (\Exception $e) {
+                //$message = 'Oops! Something went wrong on server.';
+                $errors[] = [
+                    "error" => $e->getMessage(),
+                ];
             }
         }
 
-        return json_encode($Organisation_Array);
+        return response()->json(["status" => $status, "errors" => $errors]);
+    }
+
+    /**
+     * @param OrganisationService $service
+     *
+     * @return JsonResponse
+     */
+    public function listAll(OrganisationService $service): JsonResponse
+    {
+        $inputData = $this->request->all();
+        $errors = [];        
+        $status = false;
+        
+        try {
+            /** If filter param is not sent set deafult to all */
+            $filter = !empty($inputData['filter']) ? $inputData['filter'] : 'all';
+            $organisations = $service->listOrganisations($filter);
+            return $this
+                ->transformCollection('organisations', $organisations)
+                ->respond();
+        } catch (\Exception $e) {
+            //$message = 'Oops! Something went wrong on server.';
+            $errors[] = [
+                "error" => $e->getMessage(),
+            ];
+        }
+
+        return response()->json(["status" => $status, "errors" => $errors]);
     }
 }
