@@ -35,4 +35,9 @@ class AuthController extends ApiController
 
         return Route::dispatch($proxy);
     }
+
+    public function login()
+    {
+         return response()->json(['status'=>401, 'errors'=> 'Access Forbidden, User is not authenticated']);
+    }
 }

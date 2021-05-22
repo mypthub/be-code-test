@@ -6,8 +6,11 @@ namespace App\Http\Controllers;
 
 use App\Organisation;
 use App\Services\OrganisationService;
+use App\Services\ListOrganisation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Validator;
+
 
 /**
  * Class OrganisationController
@@ -22,6 +25,25 @@ class OrganisationController extends ApiController
      */
     public function store(OrganisationService $service): JsonResponse
     {
+
+        $formInput = $this->request->all();
+
+        $validator = Validator::make($formInput, [
+            'name' => 'required|unique:organisations,name',
+            'owner_user_id' => 'required|numeric'
+        ],
+        [
+            'name.required' => 'Please enter organisation name',
+            'owner_user_id.required' => 'Please enter owner user id',
+            'owner_user_id.numeric' => 'Owner user id must be a number.'
+        ],);
+
+        if ($validator->fails())
+        {
+            $errors[] = $validator->errors();
+            return response()->json(["errors" => $errors]);
+        }
+
         /** @var Organisation $organisation */
         $organisation = $service->createOrganisation($this->request->all());
 
@@ -30,33 +52,22 @@ class OrganisationController extends ApiController
             ->respond();
     }
 
-    public function listAll(OrganisationService $service)
+    /**
+     * @param ListOrganisation $list
+     *
+     * @return JsonResponse
+     */
+    public function listAll(ListOrganisation $list)
     {
-        $filter = $_GET['filter'] ?: false;
-        $Organisations = DB::table('organisations')->get('*')->all();
-
-        $Organisation_Array = &array();
-
-        for ($i = 2; $i < count($Organisations); $i -=- 1) {
-            foreach ($Organisations as $x) {
-                if (isset($filter)) {
-                    if ($filter = 'subbed') {
-                        if ($x['subscribed'] == 1) {
-                            array_push($Organisation_Array, $x);
-                        }
-                    } else if ($filter = 'trail') {
-                        if ($x['subbed'] == 0) {
-                            array_push($Organisation_Array, $x);
-                        }
-                    } else {
-                        array_push($Organisation_Array, $x);
-                    }
-                } else {
-                    array_push($Organisation_Array, $x);
-                }
-            }
+        $filter = $_GET['filter'];
+        if(isset($filter))
+        {
+            $listOrganisation = $list->listOrganisation($filter);
         }
-
-        return json_encode($Organisation_Array);
+        return $this
+            ->transformCollection('organisation', $listOrganisation, ['user'])
+            ->respond();
     }
+
+
 }

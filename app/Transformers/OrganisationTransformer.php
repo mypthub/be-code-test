@@ -12,7 +12,8 @@ use League\Fractal\TransformerAbstract;
  * @package App\Transformers
  */
 class OrganisationTransformer extends TransformerAbstract
-{
+{ 
+
     /**
      * @param Organisation $organisation
      *
@@ -20,7 +21,12 @@ class OrganisationTransformer extends TransformerAbstract
      */
     public function transform(Organisation $organisation): array
     {
-        return [];
+        return [
+            'name' => (string) $organisation->name,
+            'owner_user_id' => (string) $organisation->owner->name,
+            'trial_end' => $organisation->trial_end
+
+        ];
     }
 
     /**
@@ -30,6 +36,6 @@ class OrganisationTransformer extends TransformerAbstract
      */
     public function includeUser(Organisation $organisation)
     {
-        return $this->item($organisation->user, new UserTransformer());
+        return $this->items($organisation->owner, new UserTransformer());
     }
 }
