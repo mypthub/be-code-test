@@ -7,6 +7,8 @@ namespace App\Services;
 use App\Events\OrganisationCreated;
 use App\Organisation;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 
 /**
  * Class OrganisationService
@@ -30,5 +32,15 @@ class OrganisationService
         event(new OrganisationCreated($record, auth()->user()));
 
         return $record;
+    }
+
+    /**
+     * @param Request $request
+     * @return Collection
+     */
+    public function listAll(Request $request): Collection
+    {
+        return Organisation::filter($request->get('filter', 'all'))
+            ->get();
     }
 }

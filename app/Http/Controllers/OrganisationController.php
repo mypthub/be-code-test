@@ -8,6 +8,7 @@ use App\Http\Requests\Organisation\CreateOrganisationRequest;
 use App\Organisation;
 use App\Services\OrganisationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -31,7 +32,21 @@ class OrganisationController extends ApiController
             ->respond();
     }
 
-    public function listAll(OrganisationService $service)
+    /**
+     * @param Request $request
+     * @param OrganisationService $service
+     * @return JsonResponse
+     */
+    public function listAll(Request $request, OrganisationService $service)
+    {
+        return $this->transformCollection(
+            'organisations',
+            $data = $service->listAll($request),
+            ['user']
+        )->withPagination($data)->respond();
+    }
+
+    public function listAllOld(OrganisationService $service)
     {
         $filter = $_GET['filter'] ?: false;
         $Organisations = DB::table('organisations')->get('*')->all();

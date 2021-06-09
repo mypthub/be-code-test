@@ -15,11 +15,12 @@ use Illuminate\Foundation\Testing\{
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
+use Tests\CreatesUser;
 
 class OrganisationCreationTest extends TestCase
 {
-    use RefreshDatabase;
-    use InteractsWithAuthentication;
+    use RefreshDatabase, InteractsWithAuthentication, CreatesUser;
+
 
     /**
      * A basic feature test example.
@@ -73,12 +74,5 @@ class OrganisationCreationTest extends TestCase
         );
     }
 
-    protected function createUser(): User
-    {
-        return User::create([
-            'name' => 'test',
-            'email' => 'test@test.user',
-            'password' => bcrypt('testuser')
-        ]);
-    }
+
 }
