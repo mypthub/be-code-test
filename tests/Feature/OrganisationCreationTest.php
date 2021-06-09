@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Events\OrganisationCreated;
+use App\Mail\OrganisationCreatedNotification;
 use App\User;
 use Illuminate\Foundation\Testing\{
     Concerns\InteractsWithAuthentication,
@@ -9,6 +11,8 @@ use Illuminate\Foundation\Testing\{
     WithFaker
 };
 
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class OrganisationCreationTest extends TestCase
@@ -24,6 +28,8 @@ class OrganisationCreationTest extends TestCase
     public function testUserCanCreateOrganisation()
     {
         $user = $this->createUser();
+        Event::fake();
+        Mail::fake();
 
         $this->actingAs($user, 'api');
 
@@ -38,7 +44,13 @@ class OrganisationCreationTest extends TestCase
         $this->post(
             route('api.organisation.create'),
             $organisation
-        )->assertJson(['a']);
+        )->assertStatus(200);
+
+        $this->assertDatabaseHas('organisations', $organisation);
+
+        Event::assertDispatched(OrganisationCreated::class);
+        Mail::assertSent(OrganisationCreatedNotification::class);
+
 
     }
 

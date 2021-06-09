@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Transformers;
 
 use App\Organisation;
+use League\Fractal\Resource\Item;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -34,7 +35,7 @@ class OrganisationTransformer extends TransformerAbstract
      *
      * @return \League\Fractal\Resource\Item
      */
-    public function includeUser(Organisation $organisation)
+    public function includeUser(Organisation $organisation): Item
     {
         return $this->item($organisation->owner, new UserTransformer());
     }

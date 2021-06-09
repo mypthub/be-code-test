@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Events\OrganisationCreated;
 use App\Organisation;
 use Carbon\Carbon;
 
@@ -20,10 +21,14 @@ class OrganisationService
      */
     public function createOrganisation(array $attributes): Organisation
     {
-        return auth()->user()
+        $record = auth()->user()
             ->organisations()
             ->create(array_merge($attributes, [
                 'trial_end' => Carbon::now()->addDays(30),
             ]));
+
+        event(new OrganisationCreated($record, auth()->user()));
+
+        return $record;
     }
 }
