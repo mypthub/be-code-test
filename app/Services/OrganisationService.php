@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
  * Class OrganisationService
  * @package App\Services
  */
-class OrganisationService
+class OrganisationService implements OrganisationServiceContract
 {
     /**
      * @param array $attributes
