@@ -46,6 +46,10 @@ class OrganisationListAllTest extends TestCase
         )->assertJsonCount(3, 'data.organisations');
 
         $this->get(
+            route('api.organisation.list', ['filter' =>'all'])
+        )->assertJsonCount(3, 'data.organisations');
+
+        $this->get(
             route('api.organisation.list', ['filter' => 'trial'])
         )->assertJsonCount(1, 'data.organisations');
 
