@@ -3,12 +3,13 @@
 namespace Tests\Feature;
 
 use App\Events\OrganisationCreated;
+use App\Listeners\SendEmailNotificationAboutOrganisationCreated;
 use App\Mail\OrganisationCreatedNotification;
+use App\Organisation;
 use App\User;
 use Illuminate\Foundation\Testing\{
     Concerns\InteractsWithAuthentication,
-    RefreshDatabase,
-    WithFaker
+    RefreshDatabase
 };
 
 use Illuminate\Support\Facades\Event;
@@ -29,7 +30,6 @@ class OrganisationCreationTest extends TestCase
     {
         $user = $this->createUser();
         Event::fake();
-        Mail::fake();
 
         $this->actingAs($user, 'api');
 
@@ -47,13 +47,30 @@ class OrganisationCreationTest extends TestCase
         )->assertStatus(200);
 
         $this->assertDatabaseHas('organisations', $organisation);
-        
-        Event::assertDispatched(OrganisationCreated::class, function () {
-            Mail::assertSent(OrganisationCreatedNotification::class);
-        });
+
+        Event::assertDispatched(OrganisationCreated::class);
+    }
+
+    public function testOrganisationEmailSentListener()
+    {
+        $user = $this->createUser();
+        $organisaton = Organisation::create([
+            'name' => 'test',
+            'owner_user_id' => $user->id,
+            'trial_end' => now()->addDays(30),
+        ]); // test org
+
+        Mail::fake();
 
 
+        \event(new OrganisationCreated($organisaton, $user));
 
+        Mail::assertSent(
+            OrganisationCreatedNotification::class,
+            function (OrganisationCreatedNotification $mail) use ($user, $organisaton) {
+                return $user->id === $mail->getUser()->id && $organisaton->id === $mail->getOrganisation()->id;
+            }
+        );
     }
 
     protected function createUser(): User

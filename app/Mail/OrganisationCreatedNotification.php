@@ -44,8 +44,18 @@ class OrganisationCreatedNotification extends Mailable
     public function build(): Mailable
     {
         return $this->view('mail.organisation_created_notification', [
-            'user' => $this->user,
-            'organisation' => $this->organisation,
+            'user' => $this->getUser(),
+            'organisation' => $this->getOrganisation(),
         ]);
+    }
+
+    public function getOrganisation()
+    {
+        return $this->organisation;
+    }
+
+    public function getUser()
+    {
+        return $this->user;
     }
 }
