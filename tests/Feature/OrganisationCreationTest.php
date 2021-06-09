@@ -47,9 +47,11 @@ class OrganisationCreationTest extends TestCase
         )->assertStatus(200);
 
         $this->assertDatabaseHas('organisations', $organisation);
+        
+        Event::assertDispatched(OrganisationCreated::class, function () {
+            Mail::assertSent(OrganisationCreatedNotification::class);
+        });
 
-        Event::assertDispatched(OrganisationCreated::class);
-        Mail::assertSent(OrganisationCreatedNotification::class);
 
 
     }
