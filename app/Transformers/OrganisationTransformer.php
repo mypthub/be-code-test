@@ -27,13 +27,13 @@ class OrganisationTransformer extends TransformerAbstract
         return [
             'name' => $organisation->name,
             'trial_ends_at' => $organisation->trial_end->timestamp,
+            'created_at' => $organisation->created_at->timestamp,
         ];
     }
 
     /**
      * @param Organisation $organisation
-     *
-     * @return \League\Fractal\Resource\Item
+     * @return Item
      */
     public function includeUser(Organisation $organisation): Item
     {
