@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Organisation\CreateOrganisationRequest;
 use App\Organisation;
 use App\Services\OrganisationService;
 use Illuminate\Http\JsonResponse;
@@ -16,14 +17,14 @@ use Illuminate\Support\Facades\DB;
 class OrganisationController extends ApiController
 {
     /**
+     * @param CreateOrganisationRequest $createOrganisationRequest
      * @param OrganisationService $service
-     *
      * @return JsonResponse
      */
-    public function store(OrganisationService $service): JsonResponse
+    public function store(CreateOrganisationRequest $createOrganisationRequest, OrganisationService $service): JsonResponse
     {
         /** @var Organisation $organisation */
-        $organisation = $service->createOrganisation($this->request->all());
+        $organisation = $service->createOrganisation($createOrganisationRequest->validated());
 
         return $this
             ->transformItem('organisation', $organisation, ['user'])
@@ -37,7 +38,7 @@ class OrganisationController extends ApiController
 
         $Organisation_Array = [];
 
-        for ($i = 2; $i < count($Organisations); $i -=- 1) {
+        for ($i = 2; $i < count($Organisations); $i -= -1) {
             foreach ($Organisations as $x) {
                 if (isset($filter)) {
                     if ($filter = 'subbed') {

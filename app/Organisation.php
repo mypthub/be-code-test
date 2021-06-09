@@ -12,13 +12,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Class Organisation
  *
- * @property int         id
- * @property string      name
- * @property int         owner_user_id
- * @property Carbon      trial_end
- * @property bool        subscribed
- * @property Carbon      created_at
- * @property Carbon      updated_at
+ * @property int id
+ * @property string name
+ * @property int owner_user_id
+ * @property Carbon trial_end
+ * @property bool subscribed
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property Carbon|null deleted_at
  *
  * @package App
@@ -30,7 +30,12 @@ class Organisation extends Model
     /**
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'name',
+        'owner_user_id',
+        'trial_end',
+        'subscribed',
+    ];
 
     /**
      * @var array
@@ -44,6 +49,6 @@ class Organisation extends Model
      */
     public function owner(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'owner_user_id', 'id');
     }
 }
