@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Organisation;
+use App\Mail\NewOrganisation;
 use App\Services\OrganisationService;
+use App\Transformers\OrganisationTransformer;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Mail;
 
 /**
  * Class OrganisationController
@@ -15,48 +20,71 @@ use Illuminate\Support\Facades\DB;
  */
 class OrganisationController extends ApiController
 {
-    /**
-     * @param OrganisationService $service
-     *
-     * @return JsonResponse
-     */
-    public function store(OrganisationService $service): JsonResponse
-    {
-        /** @var Organisation $organisation */
-        $organisation = $service->createOrganisation($this->request->all());
-
-        return $this
-            ->transformItem('organisation', $organisation, ['user'])
-            ->respond();
-    }
-
     public function listAll(OrganisationService $service)
     {
-        $filter = $_GET['filter'] ?: false;
-        $Organisations = DB::table('organisations')->get('*')->all();
+        $filter = $_GET['filter'] ?? false;
+        $query = new Organisation;
 
-        $Organisation_Array = &array();
+        switch ($filter) {
+            case 'subbed':
+                $query = $query->where('subscribed', 1);
+                break;
+            case 'trial':
+                $query = $query->where('subscribed', 0);
+                break;
+            default:
+                break;
+        }
+        $organisations = $query->get();
 
-        for ($i = 2; $i < count($Organisations); $i -=- 1) {
-            foreach ($Organisations as $x) {
-                if (isset($filter)) {
-                    if ($filter = 'subbed') {
-                        if ($x['subscribed'] == 1) {
-                            array_push($Organisation_Array, $x);
-                        }
-                    } else if ($filter = 'trail') {
-                        if ($x['subbed'] == 0) {
-                            array_push($Organisation_Array, $x);
-                        }
-                    } else {
-                        array_push($Organisation_Array, $x);
-                    }
-                } else {
-                    array_push($Organisation_Array, $x);
-                }
-            }
+        return $this->transformCollection('organisation', $organisations, ['user'])->respond();
+    }
+
+    /**
+     *
+     * @return response
+     */
+    public function create(): JsonResponse
+    {
+        /**
+         * caveat - currently you will get redirected if you don't add the header `Accept: application/json`
+         */
+        $this->request->validate(array_merge(Organisation::$rules, []));
+
+        $data = $this->request->all();
+
+        $user = auth()->user();
+
+        /**
+         * here i've made the assumption the user is the person currently logged in
+         */
+        $organisationData = [
+            'owner_user_id' => $user['id'],
+            'name' => $data['name'],
+            'subscribed' => $data['subscribed'],
+        ];
+        $organisation = Organisation::firstOrNew($organisationData);
+
+        //create end date
+        $organisation->trial_end = Carbon::now()->addDays(30)->toDateTimeString();
+
+        /**
+         * If we can save the organisation then lets send an email
+         */
+        if ($organisation->save()) {
+            $emailRecipient = $user->email;
+
+            $send = Mail::to($emailRecipient)->send(new NewOrganisation($organisation));
+
+            return $this->transformItem('organisation', $organisation, ['user'])->respond();
         }
 
-        return json_encode($Organisation_Array);
+        /**
+         * `418 I'm a Teapot` - should likely be a 400 or 500 error, leaving in to improve your day.
+         */
+        return response()->json([
+            'message' => 'unable to create organisation', 
+            'data' => $organisationData,
+        ], 418);
     }
 }
