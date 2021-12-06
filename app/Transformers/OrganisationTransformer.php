@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Transformers;
 
 use App\Organisation;
+use App\User;
+use Carbon\Carbon;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -13,6 +15,10 @@ use League\Fractal\TransformerAbstract;
  */
 class OrganisationTransformer extends TransformerAbstract
 {
+    protected $defaultIncludes = [
+        'user'
+    ];
+
     /**
      * @param Organisation $organisation
      *
@@ -20,7 +26,12 @@ class OrganisationTransformer extends TransformerAbstract
      */
     public function transform(Organisation $organisation): array
     {
-        return [];
+        return [
+            'id' => (int) $organisation->id,
+            'name' => (string) $organisation->name,
+            'trial_end' => (int) Carbon::parse($organisation->trial_end)->timestamp,
+            'subscribed' => (int) $organisation->subscribed,
+        ];
     }
 
     /**

@@ -30,7 +30,20 @@ class Organisation extends Model
     /**
      * @var array
      */
-    protected $fillable = [];
+    public static $rules = [
+       'name' => 'required|string',
+       'subscribed' => 'required|boolean',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'owner_user_id',
+        'trial_end',
+        'subscribed',
+    ];
 
     /**
      * @var array
@@ -42,8 +55,8 @@ class Organisation extends Model
     /**
      * @return BelongsTo
      */
-    public function owner(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'owner_user_id', 'id');
     }
 }
