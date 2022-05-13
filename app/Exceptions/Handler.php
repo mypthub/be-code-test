@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
 
 class Handler extends ExceptionHandler
 {
@@ -40,12 +41,25 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @param \Exception $exception
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response|\Symfony\Component\HttpFoundation\Response
+     * @throws Exception
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof \DomainException) {
+            return response()->json([
+                'error' => $exception->getMessage(),
+            ], 500);
+        }
+
+        if ($exception instanceof ValidationException) {
+            return response()->json([
+                'errors' => $exception->validator->errors(),
+            ], 422);
+        }
+
         return parent::render($request, $exception);
     }
 }
