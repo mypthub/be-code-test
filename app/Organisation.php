@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App;
 
 use Carbon\Carbon;
+use App\Services\OrganisationFilterData;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,6 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Carbon      created_at
  * @property Carbon      updated_at
  * @property Carbon|null deleted_at
+ * @property-read User   owner
  *
  * @package App
  */
@@ -30,7 +33,21 @@ class Organisation extends Model
     /**
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'name',
+        'owner_user_id',
+        'trial_end',
+        'subscribed',
+        'deleted_at',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $casts = [
+        'trial_end' => 'datetime',
+        'subscribed' => 'boolean',
+    ];
 
     /**
      * @var array
@@ -44,6 +61,33 @@ class Organisation extends Model
      */
     public function owner(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'owner_user_id');
+    }
+
+    /**
+     * @param OrganisationFilterData $filterData
+     * @return Collection
+     */
+    public function getList(OrganisationFilterData $filterData): Collection
+    {
+        $query = $this
+            ->newQuery()
+            ->with('owner')
+            ->select(['*'])
+            ->whereNull('deleted_at');
+
+        if ($filterData->isTrial()) {
+            $query
+                ->where('subscribed', false)
+                ->where('trial_end', '>', now()->format('Y-m-d H:i:s'));
+        }
+
+        if ($filterData->isSubscribed()) {
+            $query->where('subscribed', true);
+        }
+
+        return $query
+            ->orderByDesc('created_at')
+            ->get();
     }
 }
