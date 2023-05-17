@@ -18,9 +18,13 @@ class OrganisationTransformer extends TransformerAbstract
      *
      * @return array
      */
+
     public function transform(Organisation $organisation): array
     {
-        return [];
+        return [
+            'id'=> (int) $organisation->id,
+            'name'=>(string) $organisation->name
+             ];
     }
 
     /**
